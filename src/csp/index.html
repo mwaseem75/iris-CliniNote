@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Notes App</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Tabulator CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.0/dist/css/tabulator.min.css" rel="stylesheet">
+
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="resources/style.css">
+</head>
+<body>
+
+    <!-- Fixed Top Navbar (simple, no toggle) -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold text-primary" href="#">Clinical Notes</a>
+
+       <div class="ms-auto d-flex align-items-center gap-3">
+    <!-- Current user name -->
+    <span id="currentUser" class="text-muted fw-medium">
+        Loading user...
+    </span>
+
+    <!-- Logout -->
+    <a class="nav-link text-danger fw-medium" href="#" onclick="logout()">
+        <i class="bi bi-box-arrow-right me-1"></i> Logout
+    </a>
+</div>
+    </div>
+</nav>
+
+    <!-- Sidebar (always visible) -->
+    <div class="sidebar bg-white shadow-sm" id="sidebar">
+        <ul class="nav flex-column pt-5">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" data-entity="patients">
+                    <i class="bi bi-people me-2"></i> Patients
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-entity="episodes">
+                    <i class="bi bi-journal-medical me-2"></i> Episodes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-entity="notes">
+                    <i class="bi bi-journal-text me-2"></i> Notes
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow-1 p-4" style="margin-left: 250px;">
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3 searchAdj">
+    <h2 id="entityTitle">Patients</h2>
+
+    <div class="input-group" style="max-width: 400px;">
+        <span class="input-group-text bg-white border-end-0">
+            <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Search in all columns...">
+        <button class="btn btn-outline-secondary" type="button" id="clearSearchBtn" title="Clear">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <button id="addBtn" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Add New
+    </button>
+</div>
+
+        <div id="gridContainer" style="height: calc(100vh - 140px);"></div>
+    </main>
+
+    <!-- Modal for Add/Edit -->
+    <div class="modal fade" id="crudModal" tabindex="-1" aria-labelledby="crudModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="dialogHeader">Add New Record</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="dialogContent">
+                    <!-- Hidden ID + dynamic fields -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveBtn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div aria-live="polite" aria-atomic="true" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
+        <div id="toastContainer" class="toast-container"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.0/dist/js/tabulator.min.js"></script>
+    <script src="resources/app.js"></script>
+</body>
+</html>

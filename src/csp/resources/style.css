@@ -1,0 +1,123 @@
+/* style.css - Professional styling for Clinical Notes App */
+
+/* Root variables */
+:root {
+    --primary: #1976d2;
+    --primary-dark: #1565c0;
+    --light-bg: #f8f9fa;
+    --dark-text: #212529;
+    --gray-border: #dee2e6;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Body */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background-color: var(--light-bg);
+    color: var(--dark-text);
+}
+
+/* Navbar */
+.navbar {
+    background-color: white !important;
+    border-bottom: 1px solid var(--gray-border);
+    z-index: 1030;
+}
+
+/* Sidebar (always visible) */
+.sidebar {
+    width: 250px;
+    height: calc(100vh - 56px);
+    background: white;
+    border-right: 1px solid var(--gray-border);
+    position: fixed;
+    top: 56px;
+    left: 0;
+    overflow-y: auto;
+    box-shadow: var(--shadow-sm);
+}
+
+.sidebar .nav-link {
+    color: var(--dark-text);
+    padding: 0.75rem 1.5rem;
+    transition: all 0.2s;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #f1f3f5;
+}
+
+.sidebar .nav-link.active {
+    background-color: var(--primary);
+    color: white;
+    font-weight: 500;
+}
+
+/* Main content */
+main {
+    margin-left: 250px;
+    padding-top: 80px; /* FIX: Clear space for fixed navbar */
+    min-height: calc(100vh - 56px);
+}
+
+/* Toolbar (the d-flex container) */
+.searchAdj {
+    padding-top: 50px;           /* normal/desktop view - extra space below navbar */
+    margin-bottom: 1.5rem;
+}
+
+/* When screen is narrower than sidebar breakpoint (sidebar collapses/hides) */
+@media (max-width: 991.98px) {
+    .searchAdj {
+        padding-top: 0 !important;   /* remove the extra padding on mobile */
+    }
+}
+
+
+/* Grid */
+#gridContainer {
+    height: calc(100vh - 140px) !important;
+    min-height: 400px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Tabulator tweaks */
+.tabulator-header {
+    background: #f8f9fa !important;
+    border-bottom: 2px solid var(--gray-border);
+}
+
+.tabulator-col {
+    color: var(--dark-text);
+    font-weight: 600;
+}
+
+/* Modal */
+.modal-header {
+    background: var(--primary);
+    color: white;
+}
+
+/* Toast */
+.toast {
+    min-width: 250px;
+}
+
+/* Responsive */
+@media (max-width: 991.98px) {
+    .sidebar {
+        display: none; /* hide sidebar on small screens for simplicity */
+    }
+    main {
+        margin-left: 0 !important;
+        padding-top: 80px;
+    }
+    #gridContainer {
+        height: calc(100vh - 180px) !important;
+    }
+}

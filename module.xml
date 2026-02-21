@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25">
+  <Document name="iris-CliniNote.ZPM">
+    <Module>
+      <Name>iris-CliniNote</Name>
+	  <Description>Modern clinical documentation platform with semantic search capabilities.</Description> 
+      <Version>0.0.1</Version>
+      <Packaging>module</Packaging>
+      <SourcesRoot>src</SourcesRoot>
+      <Resource Name="dc.CliniNote.PKG"/>
+      <Invoke Class="dc.CliniNote.SampleDataGenerator" Method="GenerateSampleData"></Invoke>
+      <Invoke Class="dc.CliniNote.User" Method="CreateTestUsers"></Invoke>
+      <CSPApplication 
+        CookiePath="/csp/CliniNote/" 
+        DefaultTimeout="900" 
+        SourcePath="/src/csp" 
+        DeployPath="${cspdir}/csp/${namespace}/" 
+        MatchRoles=":{$dbrole}" 
+        PasswordAuthEnabled="1" 
+        Recurse="1" ServeFiles="1" 
+        ServeFilesTimeout="3600" 
+        UnauthenticatedEnabled="0" 
+        Url="/csp/CliniNote" 
+        UseSessionCookie="2"/>
+      <CSPApplication 
+        AuthenticationMethods="16416" 
+        CookiePath="/CliniNote/" 
+        DispatchClass="dc.CliniNote.CliniREST" 
+        MatchRoles=":%All" 
+        Recurse="1" 
+        ServeFiles="1" 
+        Url="/CliniNote" 
+        UseSessionCookie="1"/>    
+    </Module>
+  </Document>
+</Export>
