@@ -11,7 +11,7 @@ const ENTITIES = {
         baseUrl: '/CliniNote/patient',
         listUrl: '/CliniNote/patients',
         columnsUrl: '/CliniNote/patients/columns',
-        title: 'Patient',
+        title: 'Patients',
         dialogTitleAdd: 'Add New Patient',
         dialogTitleEdit: 'Edit Patient',
         fields: [
@@ -27,7 +27,7 @@ const ENTITIES = {
         baseUrl: '/CliniNote/episode',
         listUrl: '/CliniNote/episodes',
         columnsUrl: '/CliniNote/episodes/columns',
-        title: 'Episode',
+        title: 'Episodes',
         dialogTitleAdd: 'Add New Episode',
         dialogTitleEdit: 'Edit Episode',
         fields: [
@@ -42,7 +42,7 @@ const ENTITIES = {
         baseUrl: '/CliniNote/note',
         listUrl: '/CliniNote/notes',
         columnsUrl: '/CliniNote/notes/columns',
-        title: 'Note',
+        title: 'Notes',
         dialogTitleAdd: 'Add New Note',
         dialogTitleEdit: 'Edit Note',
         fields: [
@@ -53,7 +53,7 @@ const ENTITIES = {
         ]
     },
     vectorSearch: {
-    title: 'Vector Search',
+    title: 'Vector',
     noGrid: true  // tells loadGrid() to skip Tabulator
 }
 };
@@ -72,7 +72,7 @@ document.querySelectorAll('.nav-link[data-entity]').forEach(btn => {
         document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentEntity = btn.dataset.entity;
-        document.getElementById('entityTitle').textContent = ENTITIES[currentEntity].title + 's';
+        document.getElementById('entityTitle').textContent = ENTITIES[currentEntity].title ;
         loadGrid();
     });
 });
@@ -84,6 +84,7 @@ async function loadGrid() {
             table = null;
         }
 
+        
         document.getElementById('gridContainer').innerHTML = `
             <div class="text-center mt-5">
                 <div class="spinner-border text-primary" role="status">
@@ -94,8 +95,11 @@ async function loadGrid() {
         `;
 
         
-
         if (currentEntity === 'vectorSearch') {
+            const oldAddBtn = document.getElementById('addBtn');
+            if (oldAddBtn) oldAddBtn.remove();
+            const oldSearchGroup = document.querySelector('.input-group');
+            if (oldSearchGroup) oldSearchGroup.remove();
             renderVectorSearchUI();
             return;
         }
