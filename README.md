@@ -1,6 +1,6 @@
 # Clinical Notes App
 
-A modern, responsive web application for managing clinical patient data, episodes, and doctor notes — built with **InterSystems IRIS**, **ObjectScript**, **Bootstrap 5**, **Tabulator**, and **vector search** capabilities.
+A modern, responsive full-stack CSP application for managing clinical patient data, episodes, and doctor notes — built with **InterSystems IRIS**, **ObjectScript**, **Bootstrap 5**, **Tabulator**, and **vector search** capabilities.
 
 
 ## Features
