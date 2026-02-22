@@ -1,3 +1,59 @@
+# Clinical Notes App
+
+A modern, responsive web application for managing clinical patient data, episodes, and doctor notes — built with **InterSystems IRIS**, **ObjectScript**, **Bootstrap 5**, **Tabulator**, and **vector search** capabilities.
+
+
+## Features
+
+- **Patient Management** — CRUD operations (create, read, update, delete)
+- **Episode Tracking** — episodes linked to patients with type, dates, reason
+- **Clinical Notes** — doctor notes attached to episodes
+- **Semantic Vector Search** — search notes by meaning (not just keywords) using IRIS native vector search + sentence-transformers embeddings
+- **User Authentication** — custom login system with roles (Admin, Doctor, Nurse, Viewer)
+- **Responsive Design** — works great on desktop and mobile
+- **Professional UI** — Bootstrap 5 + clean sidebar navigation
+
+## Tech Stack
+
+**Backend**
+- InterSystems IRIS (database, REST API, vector search)
+- ObjectScript (classes, dispatch logic)
+- IRIS Embedded Python (sentence-transformers for embeddings)
+
+**Frontend**
+- HTML5 / CSS3 / JavaScript
+- Bootstrap 5 (responsive layout, modals, toasts)
+- Tabulator.js (interactive data grids)
+- Tom Select (searchable patient dropdown)
+- Fetch API (REST communication)
+
+## Screenshots
+
+(Add 3–5 screenshots here – recommended order:)
+
+1. Login screen
+<img width="1452" height="827" alt="image" src="https://github.com/user-attachments/assets/2d58874a-e1e5-4a36-adea-f79d7db90eb3" />
+
+2. Main dashboard with sidebar & patient grid  
+<img width="1916" height="927" alt="image" src="https://github.com/user-attachments/assets/dde159c0-0f99-402f-86bc-39362c2da585" />
+
+3. Vector search interface with results
+<img width="1877" height="916" alt="image" src="https://github.com/user-attachments/assets/0a9083b2-635f-4891-96c4-8421fe486408" />
+
+## Installation & Setup
+
+### Prerequisites
+
+- InterSystems IRIS 2024.1+ (with Embedded Python enabled)
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/[your-username]/clinical-notes-iris.git
+   cd clinical-notes-iris
+
 <img src="https://community.intersystems.com/sites/default/files/inline/images/archived.gif" width=100></img>
 <b>&nbsp;no maintenance or update</b> 
 
@@ -29,62 +85,8 @@ To build and start the container run:
 ```
 $ docker compose up -d && docker compose logs -f
 ```
-To open IRIS Terminal do:
-```
-$ docker-compose exec iris iris session iris
-USER>
-```
-or using **iTerm**
-```
-http://localhost:42773/iterm/
-```
-To access IRIS System Management Portal
+To access the application (Credentials admin/admin)
+http://localhost:42773/csp/Clininote/index.html
 ```
 http://localhost:42773/csp/sys/UtilHome.csp
 ```
-### How to use it
-From terminal just start   
-```
-USER>do ^A.DemoV
-
-     Test Vector Search
-=============================
-     1 - Initialize Tables
-     2 - Generate Data
-     3 - VECTOR_COSINE
-     4 - VECTOR_DOT_PRODUCT
-     5 - Create Scotch
-     6 - Load Scotch.csv
-     7 - generate VECTORs
-     8 - VECTOR search
-Select Function or * to exit : 8
-
-     Default search:
-Let's look for a scotch that costs less than $100,
- and has an earthy and creamy taste
-     change price limit [100]: 50
-     change phrase [earthy and creamy taste]: earthy
-
-calculating search vector
-
-     Total below $50: 222
-
-ID      price   name
-1990    40      Wemyss Vintage Malts 'The Peat Chimney,' 8 year old, 40%
-1785    39      The Famous Jubilee, 40%
-1868    40      Tomatin, 15 year old, 43%
-2038    45      Glen Grant, 10 year old, 43%
-1733    29      Isle of Skye, 8 year old, 43%
-
-5 Rows(s) Affected
-```
-You see the basic functionalities of Vectors in steps 1..4   
-Steps 5..8 are related to the search example I borrowed from Alvin     
-Step 6 (import of test data) is straight ObjectScript       
-SQL LOAD DATA was far too sensible for irregularities in the input CSV  
-
-I suggest following the examples also in MGMT portal to watch how Vectors operate.
-
-[Article in DC](https://community.intersystems.com/post/vector-inside-iris)
-
-[GitHub](https://github.com/rcemper/Vector-inside-IRIS)
