@@ -47,8 +47,8 @@ ClassMethod Create() As %Status
 
     set obj = ##class(dc.CliniNote.Episode).%New()
     set obj.Patient = ##class(dc.CliniNote.Patient).%OpenId(input.patient)
-    set obj.StartDate = input.startDate
-    if input.%IsDefined("endDate") set obj.EndDate = input.endDate
+    set obj.StartDate = $ZDATEH(input.startDate, 3)
+    if input.%IsDefined("endDate") set obj.EndDate = $ZDATEH(input.endDate, 3)
     if input.%IsDefined("type") set obj.Type = input.type
     if input.%IsDefined("reason") set obj.Reason = input.reason
 
@@ -77,8 +77,8 @@ ClassMethod Update(pId As %Integer) As %Status
     set input = {}.%FromJSON(%request.Content)
 
     if input.%IsDefined("patient") set obj.Patient = ##class(dc.CliniNote.Patient).%OpenId(input.patient)
-    if input.%IsDefined("startDate") set obj.StartDate = input.startDate
-    if input.%IsDefined("endDate") set obj.EndDate = input.endDate
+    if input.%IsDefined("startDate") set obj.StartDate = $ZDATEH(input.startDate,3)
+    if input.%IsDefined("endDate") set obj.EndDate = $ZDATEH(input.endDate,3)
     if input.%IsDefined("type") set obj.Type = input.type
     if input.%IsDefined("reason") set obj.Reason = input.reason
 

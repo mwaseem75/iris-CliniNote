@@ -1,114 +1,205 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinical Notes App</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Clinical Notes App</title>
 
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <!-- Tabulator CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.0/dist/css/tabulator.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
 
-    <!-- Custom styles -->
-    <link rel="stylesheet" href="resources/style.css">
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+      padding: 40px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+      backdrop-filter: blur(10px);
+    }
+
+    .logo {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #1976d2;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .form-label {
+      font-weight: 500;
+      color: #444;
+    }
+
+    .btn-primary {
+      background: #1976d2;
+      border: none;
+      padding: 12px;
+      font-size: 1.1rem;
+      border-radius: 10px;
+      transition: all 0.3s;
+    }
+
+    .btn-primary:hover {
+      background: #1565c0;
+      transform: translateY(-2px);
+    }
+
+    .input-group-text {
+      background: #f8f9fa;
+      border-right: none;
+    }
+
+    .form-control {
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .form-control:focus {
+      border-color: #1976d2;
+      box-shadow: 0 0 0 0.25rem rgba(25, 118, 210, 0.25);
+    }
+
+    .text-muted a {
+      color: #1976d2;
+      text-decoration: none;
+    }
+
+    .text-muted a:hover {
+      text-decoration: underline;
+    }
+
+    .alert {
+      border-radius: 10px;
+    }
+  </style>
 </head>
 <body>
 
-    <!-- Fixed Top Navbar (simple, no toggle) -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold text-primary" href="#">Clinical Notes</a>
-
-       <div class="ms-auto d-flex align-items-center gap-3">
-    <!-- Current user name -->
-    <span id="currentUser" class="text-muted fw-medium">
-        Loading user...
-    </span>
-
-    <!-- Logout -->
-    <a class="nav-link text-danger fw-medium" href="#" onclick="logout()">
-        <i class="bi bi-box-arrow-right me-1"></i> Logout
-    </a>
-</div>
-    </div>
-</nav>
-
-    <!-- Sidebar (always visible) -->
-    <div class="sidebar bg-white shadow-sm" id="sidebar">
-        <ul class="nav flex-column pt-5">
-            <li class="nav-item">
-                <a class="nav-link active" href="#" data-entity="patients">
-                    <i class="bi bi-people me-2"></i> Patients
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#" data-entity="episodes">
-                    <i class="bi bi-journal-medical me-2"></i> Episodes
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#" data-entity="notes">
-                    <i class="bi bi-journal-text me-2"></i> Notes
-                </a>
-            </li>
-        </ul>
+  <div class="login-container">
+    <div class="logo">
+      <i class="bi bi-heart-pulse-fill me-2"></i> Clinical Notes
     </div>
 
-    <!-- Main Content -->
-    <main class="flex-grow-1 p-4" style="margin-left: 250px;">
-      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3 searchAdj">
-    <h2 id="entityTitle">Patients</h2>
+    <h4 class="text-center mb-4 text-secondary">Sign In</h4>
 
-    <div class="input-group" style="max-width: 400px;">
-        <span class="input-group-text bg-white border-end-0">
-            <i class="bi bi-search text-muted"></i>
-        </span>
-        <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Search in all columns...">
-        <button class="btn btn-outline-secondary" type="button" id="clearSearchBtn" title="Clear">
-            <i class="bi bi-x-lg"></i>
-        </button>
-    </div>
+    <!-- Error message area -->
+    <div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
 
-    <button id="addBtn" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Add New
-    </button>
-</div>
-
-        <div id="gridContainer" style="height: calc(100vh - 140px);"></div>
-    </main>
-
-    <!-- Modal for Add/Edit -->
-    <div class="modal fade" id="crudModal" tabindex="-1" aria-labelledby="crudModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="dialogHeader">Add New Record</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="dialogContent">
-                    <!-- Hidden ID + dynamic fields -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="saveBtn">Save</button>
-                </div>
-            </div>
+    <form id="loginForm">
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-person"></i></span>
+          <input type="text" class="form-control" id="username" placeholder="Enter username" required autofocus>
         </div>
-    </div>
+      </div>
 
-    <!-- Toast container -->
-    <div aria-live="polite" aria-atomic="true" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
-        <div id="toastContainer" class="toast-container"></div>
-    </div>
+      <div class="mb-4">
+        <label for="password" class="form-label">Password</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-lock"></i></span>
+          <input type="password" class="form-control" id="password" placeholder="Enter password" required>
+        </div>
+      </div>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.0/dist/js/tabulator.min.js"></script>
-    <script src="resources/app.js"></script>
+      <div class="d-grid mb-4">
+        <button type="submit" class="btn btn-primary btn-lg" id="loginBtn">
+          <span id="loginText">Login</span>
+          <span id="loginSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+        </button>
+      </div>
+
+      <div class="text-center text-muted small">
+        <a href="#">Forgot password?</a> • <a href="#">Contact support</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+  <!-- Login logic -->
+  <script>
+    const loginForm = document.getElementById('loginForm');
+    const errorAlert = document.getElementById('errorAlert');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginText = document.getElementById('loginText');
+    const loginSpinner = document.getElementById('loginSpinner');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!username || !password) {
+        showError('Please enter both username and password');
+        return;
+      }
+
+      // Show loading state
+      loginBtn.disabled = true;
+      loginText.classList.add('d-none');
+      loginSpinner.classList.remove('d-none');
+      errorAlert.classList.add('d-none');
+
+      try {
+        const response = await fetch('/clininote/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Login failed');
+        }
+
+        // Success - store user info (you can add token later)
+        localStorage.setItem('user', JSON.stringify({
+          userId: data.userId,
+          username: data.username,
+          fullName: data.fullName,
+          role: data.role
+        }));
+        
+        // After successful login response
+        localStorage.setItem('authToken', 'logged-in');  // or better: store the actual token/userId/role later
+        localStorage.setItem('user', JSON.stringify(data));  // store user info
+
+        // Redirect to main app
+        window.location.href = 'index.html';
+
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        loginBtn.disabled = false;
+        loginText.classList.remove('d-none');
+        loginSpinner.classList.add('d-none');
+      }
+    });
+
+    function showError(msg) {
+      errorAlert.textContent = msg;
+      errorAlert.classList.remove('d-none');
+    }
+  </script>
 </body>
 </html>

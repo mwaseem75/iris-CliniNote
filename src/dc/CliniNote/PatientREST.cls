@@ -46,7 +46,7 @@ ClassMethod Create() As %Status
 
     set obj = ##class(dc.CliniNote.Patient).%New()
     set obj.Name = input.name
-    if input.%IsDefined("dob") set obj.DOB = input.dob
+    if input.%IsDefined("dob") set obj.DOB = $ZDATEH(input.dob, 3)
     if input.%IsDefined("gender") set obj.Gender = input.gender
     if input.%IsDefined("street") set obj.Street = input.street
     if input.%IsDefined("city") set obj.City = input.city
@@ -78,7 +78,7 @@ ClassMethod Update(pId As %Integer) As %Status
     set input = {}.%FromJSON(%request.Content)
 
     if input.%IsDefined("name") set obj.Name = input.name
-    if input.%IsDefined("dob") set obj.DOB = input.dob
+    if input.%IsDefined("dob") set obj.DOB = $ZDATEH(input.dob, 3)
     if input.%IsDefined("gender") set obj.Gender = input.gender
     if input.%IsDefined("street") set obj.Street = input.street
     if input.%IsDefined("city") set obj.City = input.city

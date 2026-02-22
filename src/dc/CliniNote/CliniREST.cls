@@ -34,8 +34,10 @@ XData UrlMap [ XMLNamespace = "http://www.intersystems.com/urlmap" ]
     <Route Url="/note/:id" Method="PUT" Call="UpdateNote" />
     <Route Url="/note/:id" Method="DELETE" Call="DeleteNote" />
     <Route Url="/notes/columns" Method="GET" Call="GetNoteColumns" />
-
+    <!-- Log In -->
     <Route Url="/login" Method="POST" Call="Login" />
+    <!-- vector search -->
+    <Route Url="/notes/vector-search" Method="POST" Call="VectorSearchNotes" />
 </Routes>
 }
 
@@ -203,6 +205,50 @@ ClassMethod DeleteNote(pId As %Integer) As %Status
 ClassMethod GetNoteColumns() As %Status
 {
     quit ##class(dc.CliniNote.NoteREST).GetColumns()
+}
+
+ClassMethod VectorSearchNotes() As %Status
+{
+    set input = {}.%FromJSON(%request.Content)
+    set queryText = input.query
+    
+    if (queryText = "") {
+        set %response.Status = 400
+        write {"error":"Query text is required"}.%ToJSON()
+        quit $$$OK
+    }
+
+    try {
+        // Generate embedding for the query
+        set queryVector = ##class(dc.CliniNote.NoteREST).Embedd(queryText)
+        if (queryVector = "") {
+            set %response.Status = 500
+            write {"error":"Failed to generate query embedding"}.%ToJSON()
+            return $$$OK
+        }
+
+        // SQL query with vector distance
+        set sql="SELECT top 5 ID, Content,VECTOR_COSINE(ContentEmbedding, TO_VECTOR(?, DOUBLE, 384)) as Similarity FROM dc_CliniNote.Note ORDER BY VECTOR_DOT_PRODUCT(ContentEmbedding, TO_VECTOR(?, DOUBLE, 384)) DESC"
+	    set rs=##class(%SQL.Statement).%ExecDirect(.stmt,sql,queryVector,queryVector)
+                    
+        set results = []
+        while rs.%Next() {
+            do results.%Push({
+                "id":(rs.%Get("ID")),
+                "content": (rs.%Get("Content")),
+                "similarity": (rs.%Get("Similarity"))
+            })
+        }
+
+        // Return results
+        write results.%ToJSON()
+        return $$$OK
+
+    } catch ex {
+        set %response.Status = 500
+        write {"error": ("Search failed: " _ ex.DisplayString())}.%ToJSON()
+        return $$$OK
+    }
 }
 
 }

@@ -5,6 +5,7 @@ let searchTimer = null;
 if (!localStorage.getItem('authToken')) {
     window.location.href = 'login.html';
 }
+
 const ENTITIES = {
     patients: {
         baseUrl: '/CliniNote/patient',
@@ -46,10 +47,15 @@ const ENTITIES = {
         dialogTitleEdit: 'Edit Note',
         fields: [
             { id: 'episode', label: 'Episode ID *', type: 'number', required: true },
+            { id: 'notedate', label: 'Episode Date *', type: 'date', required: true }, 
             { id: 'doctor', label: 'Doctor *', type: 'text', required: true },
             { id: 'content', label: 'Content *', type: 'textarea', required: true }
         ]
-    }
+    },
+    vectorSearch: {
+    title: 'Vector Search',
+    noGrid: true  // tells loadGrid() to skip Tabulator
+}
 };
 
 let currentEntity = 'patients';
@@ -87,7 +93,16 @@ async function loadGrid() {
             </div>
         `;
 
+        
+
+        if (currentEntity === 'vectorSearch') {
+            renderVectorSearchUI();
+            return;
+        }
+        
         const colRes = await fetch(ENTITIES[currentEntity].columnsUrl);
+
+
 
         if (!colRes.ok) throw new Error(`Columns load failed: ${colRes.status}`);
         const dynamicColumns = await colRes.json();
@@ -192,6 +207,175 @@ if (!searchInput || !clearBtn) {
     }
 }
 
+function renderVectorSearchUI() {
+    const container = document.getElementById('gridContainer');
+    container.innerHTML = `
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Semantic Search in Clinical Notes</h5>
+            </div>
+            <div class="card-body">
+                <div class="input-group input-group-lg mb-4">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" id="vectorQuery" class="form-control border-start-0" placeholder="e.g. chest pain after spicy meals, shortness of breath, recurrent migraine...">
+                    <button class="btn btn-primary" id="vectorSearchBtn">
+                        <i class="bi bi-search me-1"></i> Search
+                    </button>
+                </div>
+
+                <div id="vectorResults" class="list-group mt-3"></div>
+            </div>
+        </div>
+    `;
+
+    // Event listeners
+    document.getElementById('vectorSearchBtn').addEventListener('click', performVectorSearch);
+    document.getElementById('vectorQuery').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') performVectorSearch();
+    });
+}
+
+async function performVectorSearch() {
+    const query = document.getElementById('vectorQuery').value.trim();
+    const resultsDiv = document.getElementById('vectorResults');
+
+    if (!query) {
+        resultsDiv.innerHTML = '<div class="alert alert-info">Please enter a search query.</div>';
+        return;
+    }
+
+    resultsDiv.innerHTML = '<div class="text-center py-5">Searching...</div>';
+
+    try {
+        const res = await fetch('/CliniNote/notes/vector-search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: query, limit: 10 })
+        });
+
+        // Read raw text first (very important for debug)
+        const rawText = await res.text();
+        console.log("Raw response status:", res.status);
+        console.log("Raw response headers:", [...res.headers.entries()]);
+        console.log("Raw response body (first 500 chars):", rawText.substring(0, 500));
+
+        // Try to parse as JSON
+        let data;
+        try {
+            data = JSON.parse(rawText);
+        } catch (jsonErr) {
+            console.error("JSON parse error:", jsonErr);
+            resultsDiv.innerHTML = `<div class="alert alert-danger">
+                Server response is not valid JSON.<br>
+                Status: ${res.status}<br>
+                Raw body preview: <pre>${rawText.substring(0, 300)}</pre>
+            </div>`;
+            return;
+        }
+
+        // Normal success handling
+        if (data.length === 0) {
+            resultsDiv.innerHTML = '<div class="alert alert-warning">No similar notes found.</div>';
+            return;
+        }
+
+        // let html = '';
+        // data.forEach(item => {
+        //     const similarity = (1 - item.distance).toFixed(3);
+        //     html += `
+        //         <a href="#" class="list-group-item list-group-item-action" onclick="openNote(${item.id})">
+        //             <div class="d-flex w-100 justify-content-between">
+        //                 <h6 class="mb-1">Note #${item.id}</h6>
+        //                 <small class="text-success fw-bold">Similarity: ${similarity}</small>
+        //             </div>
+        //             <p class="mb-1 text-truncate">${item.content.substring(0, 180)}${item.content.length > 180 ? '...' : ''}</p>
+        //         </a>
+        //     `;
+        // });
+
+        // resultsDiv.innerHTML = html;
+
+let html = '';
+data.forEach(item => {
+    const simValue = Number(item.similarity);
+    const similarity = isNaN(simValue) ? 'N/A' : simValue.toFixed(4);
+    const simClass = isNaN(simValue) 
+        ? 'text-muted' 
+        : (simValue > 0.9 ? 'text-success-strong' : 'text-warning-strong');
+
+    html += `
+        <div class="list-group-item list-group-item-action px-3 py-3">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">
+                <!-- Left side: note info -->
+                <div class="flex-grow-1">
+                    <h6 class="mb-1">Note #${item.id}</h6>
+                    <p class="mb-2 text-muted text-truncate">${item.content.substring(0, 180)}${item.content.length > 180 ? '...' : ''}</p>
+                </div>
+
+                <!-- Right side: similarity + button -->
+                <div class="text-end d-flex flex-column align-items-end gap-2" style="min-width: 140px;">
+                    <small class="${simClass} fw-bold">Similarity: ${similarity}</small>
+                    <button class="btn btn-sm btn-outline-primary" onclick="openNote(${item.id})">
+                        <i class="bi bi-eye me-1"></i> View Note
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+});
+
+resultsDiv.innerHTML = html;
+
+    } catch (err) {
+        resultsDiv.innerHTML = `<div class="alert alert-danger">Fetch error: ${err.message}</div>`;
+    }
+}
+
+async function openNote(noteId) {
+    try {
+        const res = await fetch(`/clininote/note/${noteId}`);
+        if (!res.ok) throw new Error('Failed to load note');
+
+        const note = await res.json();
+
+        // Log the raw note to see actual keys (remove after testing)
+        console.log("Raw note data:", note);
+
+        // Populate modal (adjust keys based on your actual JSON response)
+        document.getElementById('dialogHeader').textContent = `View Note #${note.id || noteId}`;
+
+        document.getElementById('dialogContent').innerHTML = `
+            <div class="mb-3">
+                <label class="form-label fw-bold">Doctor</label>
+                <input type="text" class="form-control" value="${note.Doctor || note.doctor || 'N/A'}" readonly>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Note Date</label>
+                <input type="text" class="form-control" value="${note.NoteDate || note.noteDate || 'N/A'}" readonly>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Episode ID</label>
+                <input type="text" class="form-control" value="${note.Episode || note.episode || 'N/A'}" readonly>
+            </div>
+            <div class="mb-4">
+                <label class="form-label fw-bold">Content</label>
+                <textarea class="form-control" rows="10" readonly>${note.Content || note.content || 'No content available'}</textarea>
+            </div>
+
+            <!-- Only Close button -->
+            <div class="text-end">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        `;
+
+        crudModal.show();
+
+    } catch (err) {
+        alert('Error loading note: ' + err.message);
+    }
+}
 //Display current user info in navbar
 function showCurrentUser() {
     const user = JSON.parse(localStorage.getItem('user'));

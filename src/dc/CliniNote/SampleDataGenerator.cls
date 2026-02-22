@@ -252,15 +252,43 @@ ClassMethod CreateNotes() As %Status [ Private ]
             set note.NoteDate = $ZDATETIME($HOROLOG, 3, 1)
             set note.Doctor   = $LISTGET(doctors, ((i-1) # 5) + 1)
             set note.Content  = $LISTGET(notes, i)
-
+            set EmbVal = ..Embedd(note.Content)
+            
             set tSC = note.%Save()
+            set newId = note.%Id()
             if $$$ISERR(tSC) quit
+            &sql(UPDATE dc_CliniNote.Note
+            SET ContentEmbedding = TO_VECTOR(:EmbVal)
+            WHERE ID = :newId)
+
+            if SQLCODE = 100 {
+                write !, "No row found with ID ", id
+            }
+            if SQLCODE < 0 {
+                write !, "SQL error: ", SQLCODE, " ", %msg
+            }
+         
         }
     }
     catch ex {
         set tSC = ex.AsStatus()
     }
     quit tSC
+}
+
+ClassMethod Embedd(sentences) As %String [ Language = python ]
+{
+	from sentence_transformers import SentenceTransformer
+
+	model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+	embeddings = model.encode(sentences, normalize_embeddings = True)
+
+	# convert the embeddings to a string
+	embeddings_list = [str(embedding.tolist()) for embedding in embeddings]
+	s1 = str(embeddings_list)
+
+	# remove apostrophes
+	return s1.replace('\'','')
 }
 
 /// Optional: clear all sample data (patients, episodes, notes)

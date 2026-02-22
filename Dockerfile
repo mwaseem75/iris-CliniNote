@@ -10,5 +10,6 @@ COPY module.xml module.xml
 COPY iris.script iris.script
 
 #RUN python3 -m pip install --target /usr/irissys/mgr/python sentence_transformers
+RUN python3 -m pip install --no-cache-dir --target /usr/irissys/mgr/python "sentence-transformers==3.1.0" "numpy<2.0"
 
 RUN iris start IRIS && iris session IRIS < iris.script && iris stop IRIS quietly 

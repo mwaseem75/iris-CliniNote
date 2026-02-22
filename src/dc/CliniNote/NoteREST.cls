@@ -52,6 +52,7 @@ ClassMethod Create() As %Status
     }
     set obj.Doctor = input.doctor
     set obj.Content = input.content
+    //set obj.NoteDate =$ZDATEH(input.notedate, 3)
     // NoteDate is auto-set by InitialExpression
 
     set sc = obj.%Save()
@@ -60,7 +61,18 @@ ClassMethod Create() As %Status
         write {"error":($SYSTEM.Status.GetErrorText(sc))}.%ToJSON()
         quit $$$OK
     }
+    set newId = obj.%Id()
+    set EmbVal = ..Embedd(input.content)
+    &sql(UPDATE dc_CliniNote.Note
+        SET ContentEmbedding = TO_VECTOR(:EmbVal)
+        WHERE ID = :newId)
 
+    if SQLCODE = 100 {
+            write !, "No row found with ID ", id
+         }
+    if SQLCODE < 0 {
+            write !, "SQL error: ", SQLCODE, " ", %msg
+        }
     set %response.Status = 201
     do obj.%JSONExport()
     quit $$$OK
@@ -96,6 +108,10 @@ ClassMethod Update(pId As %Integer) As %Status
         write {"error":($SYSTEM.Status.GetErrorText(sc))}.%ToJSON()
         quit $$$OK
     }
+    set EmbVal = ..Embedd(input.content)
+    &sql(UPDATE dc_CliniNote.Note
+        SET ContentEmbedding = TO_VECTOR(:EmbVal)
+        WHERE ID = :pId)
 
     do obj.%JSONExport()
     quit $$$OK
@@ -141,6 +157,21 @@ ClassMethod GetColumns() As %Status
 
     write tColumns.%ToJSON()
     quit $$$OK
+}
+
+ClassMethod Embedd(sentences) As %String [ Language = python ]
+{
+	from sentence_transformers import SentenceTransformer
+
+	model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+	embeddings = model.encode(sentences, normalize_embeddings = True)
+
+	# convert the embeddings to a string
+	embeddings_list = [str(embedding.tolist()) for embedding in embeddings]
+	s1 = str(embeddings_list)
+
+	# remove apostrophes
+	return s1.replace('\'','')
 }
 
 /// Helper method to make it cleaner and easier to maintain

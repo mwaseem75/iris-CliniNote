@@ -1,0 +1,7 @@
+{
+    "objectscript.conn": {
+        "active": true,
+        "server": "docker",
+        "ns": "USER"
+    }
+}
