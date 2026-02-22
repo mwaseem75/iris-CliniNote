@@ -30,13 +30,13 @@ A modern, responsive full-stack CSP application for managing clinical patient da
 ## Screenshots
 
 1. Login screen
-<img width="1452" height="827" alt="image" src="https://github.com/user-attachments/assets/2d58874a-e1e5-4a36-adea-f79d7db90eb3" />
+<img width="1452" alt="image" src="https://github.com/user-attachments/assets/2d58874a-e1e5-4a36-adea-f79d7db90eb3" />
 
 2. Main dashboard with sidebar & patient grid  
-<img width="1916" height="927" alt="image" src="https://github.com/user-attachments/assets/dde159c0-0f99-402f-86bc-39362c2da585" />
+<img width="1916" alt="image" src="https://github.com/user-attachments/assets/dde159c0-0f99-402f-86bc-39362c2da585" />
 
 3. Vector search interface with results
-<img width="1877" height="916" alt="image" src="https://github.com/user-attachments/assets/0a9083b2-635f-4891-96c4-8421fe486408" />
+<img width="1877" alt="image" src="https://github.com/user-attachments/assets/0a9083b2-635f-4891-96c4-8421fe486408" />
 
 ### Prerequisites
 Make sure you have [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [Docker desktop](https://www.docker.com/products/docker-desktop) installed.
