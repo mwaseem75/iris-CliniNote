@@ -2,7 +2,7 @@
 
 // Check authentication
 if (!localStorage.getItem('authToken')) {
-    window.location.href = 'login.html';
+     window.location.href = 'login.html';
 }
 
 const ENTITIES = {
