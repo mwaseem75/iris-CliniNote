@@ -1,8 +1,7 @@
-// app.js - Clinical Application
+// app.js - Clinical Application (fully fixed version)
 
-// Check authentication
 if (!localStorage.getItem('authToken')) {
-     window.location.href = 'login.html';
+    window.location.href = 'login.html';
 }
 
 const ENTITIES = {
@@ -31,8 +30,8 @@ const ENTITIES = {
         dialogTitleEdit: 'Edit Episode',
         fields: [
             { id: 'patient', label: 'Patient *', type: 'search-select', required: true },
-            { id: 'startdate', label: 'Start Date *', type: 'date', required: true },
-            { id: 'enddate', label: 'End Date', type: 'date' },
+            { id: 'startDate', label: 'Start Date *', type: 'date', required: true },
+            { id: 'endDate', label: 'End Date', type: 'date' },
             { id: 'type', label: 'Type', type: 'select', options: ['Outpatient', 'Inpatient', 'Emergency', 'Consultation', 'Surgery', 'Follow-up'] },
             { id: 'reason', label: 'Reason', type: 'textarea' }
         ]
@@ -45,7 +44,7 @@ const ENTITIES = {
         dialogTitleAdd: 'Add New Note',
         dialogTitleEdit: 'Edit Note',
         fields: [
-            { id: 'episode', label: 'Episode ID *', type: 'search-select', required: true },
+            { id: 'episode', label: 'Episode *', type: 'search-select', required: true },
             { id: 'doctor', label: 'Doctor *', type: 'text', required: true },
             { id: 'content', label: 'Content *', type: 'textarea', required: true }
         ]
@@ -55,47 +54,47 @@ const ENTITIES = {
         noGrid: true
     },
     users: {
-    baseUrl: '/CliniNote/user',
-    listUrl: '/CliniNote/users',
-    columnsUrl: '/CliniNote/users/columns',
-    title: 'Users',
-    dialogTitleAdd: 'Add New User',
-    dialogTitleEdit: 'Edit User',
-    fields: [
-        { id: 'username', label: 'Username *', type: 'text', required: true },
-        { id: 'password', label: 'Password', type: 'password', required: true, editRequired: false },
-        { id: 'fullname', label: 'Full Name', type: 'text' },    
-        { id: 'email', label: 'Email', type: 'text' },        
-        { id: 'role', label: 'Role *', type: 'select', options: ['Admin', 'Doctor', 'Nurse', 'Viewer'], required: true },
-        { id: 'active', label: 'Active', type: 'checkbox', default: true },
-     ]
-},
-roles: {
-    baseUrl: '/CliniNote/role',
-    listUrl: '/CliniNote/roles',
-    columnsUrl: '/CliniNote/roles/columns',
-    title: 'Roles',
-    dialogTitleAdd: 'Add New Role',
-    dialogTitleEdit: 'Edit Role',
-    fields: [
-        { id: 'name', label: 'Role Name *', type: 'text', required: true },
-        { id: 'description', label: 'Description', type: 'textarea' },
-        {
-            id: 'permissions',
-            label: 'Permissions *',
-            type: 'multi-select',
-            required: true,
-            options: [
-                'Patient:Read', 'Patient:Write', 'Patient:Delete',
-                'Episode:Read', 'Episode:Write', 'Episode:Delete',
-                'Note:Read', 'Note:Write', 'Note:Delete',
-                'User:Read', 'User:Write', 'User:Delete',
-                'Role:Read', 'Role:Write', 'Role:Delete'
-            ]
-        },
-        { id: 'active', label: 'Active', type: 'checkbox', default: true }
-    ]
-}
+        baseUrl: '/CliniNote/user',
+        listUrl: '/CliniNote/users',
+        columnsUrl: '/CliniNote/users/columns',
+        title: 'Users',
+        dialogTitleAdd: 'Add New User',
+        dialogTitleEdit: 'Edit User',
+        fields: [
+            { id: 'username', label: 'Username *', type: 'text', required: true },
+            { id: 'password', label: 'Password', type: 'password', required: true, editRequired: false },
+            { id: 'fullname', label: 'Full Name', type: 'text' },    
+            { id: 'email', label: 'Email', type: 'text' },        
+            { id: 'role', label: 'Role *', type: 'select', options: ['Admin', 'Doctor', 'Nurse', 'Viewer'], required: true },
+            { id: 'active', label: 'Active', type: 'checkbox', default: true },
+        ]
+    },
+    roles: {
+        baseUrl: '/CliniNote/role',
+        listUrl: '/CliniNote/roles',
+        columnsUrl: '/CliniNote/roles/columns',
+        title: 'Roles',
+        dialogTitleAdd: 'Add New Role',
+        dialogTitleEdit: 'Edit Role',
+        fields: [
+            { id: 'name', label: 'Role Name *', type: 'text', required: true },
+            { id: 'description', label: 'Description', type: 'textarea' },
+            {
+                id: 'permissions',
+                label: 'Permissions *',
+                type: 'multi-select',
+                required: true,
+                options: [
+                    'Patient:Read', 'Patient:Write', 'Patient:Delete',
+                    'Episode:Read', 'Episode:Write', 'Episode:Delete',
+                    'Note:Read', 'Note:Write', 'Note:Delete',
+                    'User:Read', 'User:Write', 'User:Delete',
+                    'Role:Read', 'Role:Write', 'Role:Delete'
+                ]
+            },
+            { id: 'active', label: 'Active', type: 'checkbox', default: true }
+        ]
+    }
 };
 
 let currentEntity = 'patients';
@@ -125,12 +124,18 @@ async function loadGrid() {
             return;
         }
 
-        // Clean up previous content & buttons
+        // Clear only grid content
         container.innerHTML = '';
+
+        // Remove old Add button
         const oldAddBtn = document.getElementById('addBtn');
         if (oldAddBtn) oldAddBtn.remove();
-        const oldSearchGroup = document.querySelector('.input-group');
-        if (oldSearchGroup && currentEntity !== 'vectorSearch') oldSearchGroup.remove();
+
+        // Hide/show search bar
+        const searchGroup = document.getElementById('gridSearchGroup');
+        if (searchGroup) {
+            searchGroup.style.display = (currentEntity === 'vectorSearch') ? 'none' : 'flex';
+        }
 
         // Special view: Vector Search
         if (currentEntity === 'vectorSearch') {
@@ -145,7 +150,7 @@ async function loadGrid() {
             return;
         }
 
-        // Show loading
+        // Loading spinner
         container.innerHTML = `
             <div class="text-center mt-5">
                 <div class="spinner-border text-primary" role="status">
@@ -158,25 +163,27 @@ async function loadGrid() {
         // Load columns
         const colRes = await fetch(ENTITIES[currentEntity].columnsUrl);
         if (!colRes.ok) throw new Error(`Columns load failed: ${colRes.status}`);
-        const dynamicColumns = await colRes.json();
+        let dynamicColumns = await colRes.json();
+
+        // Force read-only + friendly formatters
         dynamicColumns.forEach(col => {
-            col.editable = false; // force all read-only
+            col.editable = false;
             if (col.field === 'patient') {
-            col.formatter = function(cell) {
-            const rowData = cell.getRow().getData();
-            const name = rowData.patientName || 'Unknown';
-            const id = rowData.patient || 'N/A';
-            return `${name} (ID: ${id})`;            
-            };
-            col.title = "Patient"; // optional rename
+                col.formatter = function(cell) {
+                    const rowData = cell.getRow().getData();
+                    const name = rowData.patientName || 'Unknown';
+                    const id = rowData.patient || 'N/A';
+                    return `${name} (ID: ${id})`;
+                };
+                col.title = "Patient";
             }
             if (col.field === 'episode') {
-            col.formatter = function(cell) {
-            const rowData = cell.getRow().getData();
-            return rowData.episodeLabel || `Episode #${rowData.episode}`;
-            };
-            col.title = "Episode";
-           }
+                col.formatter = function(cell) {
+                    const rowData = cell.getRow().getData();
+                    return rowData.episodeLabel || `Episode #${rowData.episode}`;
+                };
+                col.title = "Episode";
+            }
         });
 
         // Create Tabulator
@@ -192,117 +199,80 @@ async function loadGrid() {
             ajaxConfig: "GET",
             ajaxContentType: "json",
             columns: dynamicColumns,
-            cellEdited: async function(cell) {
-                const rowData = cell.getRow().getData();
-                try {
-                    const r = await fetch(`${ENTITIES[currentEntity].baseUrl}/${rowData.id}`, {
-                        method: 'PUT',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(rowData)
-                    });
-                    if (!r.ok) throw new Error('Update failed');
-                    table.setData(ENTITIES[currentEntity].listUrl);
-                    showToast('success', 'Record updated');
-                } catch (err) {
-                    showToast('danger', 'Update failed: ' + err.message);
-                    cell.restoreOldValue();
-                }
-            }
+            // No cellEdited → read-only grid
         });
 
-        // Attach double-click edit
+        // Double-click edit (skip for Roles)
         table.on("rowDblClick", function(e, row) {
-        if (currentEntity === 'roles') {
-            // Do nothing on double-click for Roles (or show message)
-            showToast('info', 'Edit Roles via the Add/Edit button only');
-            return;
-        }
-        // Normal edit dialog for all other entities
-        openDialog(true, row.getData());
+            if (currentEntity === 'roles') {
+                showToast('info', 'Edit Roles via Add/Edit button only');
+                return;
+            }
+            openDialog(true, row.getData());
         });
 
-        // Main grid search (single clean version)
-        const searchInput = document.getElementById('searchInput');
-        const clearBtn = document.getElementById('clearSearchBtn');
-
-        if (searchInput && clearBtn && table) {
-            console.log("Main grid search attached");
-
-            searchInput.value = '';
-
-            searchInput.addEventListener('input', () => {
-                clearTimeout(window.gridSearchTimer);
-                window.gridSearchTimer = setTimeout(() => {
-                    const term = searchInput.value.trim().toLowerCase();
-                    if (term === '') {
-                        table.clearFilter();
-                    } else {
-                        table.setFilter("all", "like", term);
-                    }
-                }, 300);
-            });
-
-            clearBtn.addEventListener('click', () => {
-                searchInput.value = '';
-                table.clearFilter();
-                searchInput.focus();
-            });
-        }
+        // Attach grid search (only for normal grids)
+        attachGridSearch();
 
         // Rebuild dialog
         await setupDialog();
 
-        // Add new Add button
-        if (currentEntity !== 'roles') {
-        const addBtn = document.createElement('button');
-        addBtn.id = 'addBtn';
-        addBtn.textContent = `Add New ${ENTITIES[currentEntity].title}`;
-        addBtn.className = 'btn btn-primary';
-        addBtn.onclick = () => openDialog(false);
-        document.querySelector('.d-flex.justify-content-between').appendChild(addBtn);
-        }    
+        // Re-create Add button (skip for Roles & Vector Search)
+        if (currentEntity !== 'roles' && currentEntity !== 'vectorSearch') {
+            const addBtn = document.createElement('button');
+            addBtn.id = 'addBtn';
+            addBtn.textContent = `Add New ${ENTITIES[currentEntity].title}`;
+            addBtn.className = 'btn btn-primary';
+            addBtn.onclick = () => openDialog(false);
+            document.querySelector('.d-flex.justify-content-between').appendChild(addBtn);
+        }
+
     } catch (err) {
         console.error("loadGrid error:", err);
         document.getElementById('gridContainer').innerHTML = `<div class="alert alert-danger m-4">Error: ${err.message}</div>`;
     }
 }
 
-async function loadEpisodesIntoDropdown(selectEl) {
-    try {
-        // Fetch all episodes from your REST API
-        const response = await fetch('/CliniNote/episodes');
-        if (!response.ok) {
-            throw new Error(`Failed to load episodes: ${response.status}`);
-        }
+// Reusable grid search attachment
+function attachGridSearch() {
+    const input = document.getElementById('searchInput');
+    const clear = document.getElementById('clearSearchBtn');
 
-        const episodes = await response.json();
-
-        // Clear existing options
-        selectEl.innerHTML = '<option value="">Select or search episode...</option>';
-
-        // Add each episode as an option
-        episodes.forEach(episode => {
-            const option = document.createElement('option');
-            option.value = episode.id;  // store episode ID as value
-
-            // Show useful info (adjust fields to match your Episode class)
-            // Example: ID - Start Date - Type - (Patient if available)
-            let label = `Episode #${episode.id}`;
-            if (episode.startDate) label += ` - ${episode.startDate}`;
-            if (episode.type) label += ` (${episode.type})`;
-            if (episode.patientName) label += ` - Patient: ${episode.patientName}`;
-            else if (episode.patient) label += ` - Patient ID: ${episode.patient}`;
-
-            option.textContent = label;
-            selectEl.appendChild(option);
-        });
-
-        console.log(`Loaded ${episodes.length} episodes into dropdown`);
-
-    } catch (err) {
-        console.error('Error loading episodes:', err);
-        selectEl.innerHTML = '<option value="">Error loading episodes</option>';
+    if (!input || !clear || !table) {
+        console.warn("Grid search elements or table missing");
+        return;
     }
+
+    console.log("Attaching grid search listeners");
+
+    input.value = '';
+
+    searchInput.addEventListener('input', () => {
+    clearTimeout(window.gridSearchTimer);
+    window.gridSearchTimer = setTimeout(() => {
+        const term = searchInput.value.trim().toLowerCase();
+        console.log("Applying filter with term:", term);
+
+        if (term === '') {
+            table.clearFilter();
+            console.log("Filter cleared");
+        } else {
+            table.setFilter(function(data, filterParams) {
+                // Custom global search: check every string value in the row
+                return Object.values(data).some(value => {
+                    if (value == null) return false;
+                    return String(value).toLowerCase().includes(term);
+                });
+            });
+            console.log("Custom filter applied");
+        }
+    }, 300);
+});
+    clear.addEventListener('click', () => {
+        input.value = '';
+        table.clearFilter();
+        input.focus();
+    });
 }
 
 // Patient dropdown loading
@@ -327,6 +297,38 @@ async function loadPatientsIntoDropdown(selectEl) {
     } catch (err) {
         console.error('Error loading patients:', err);
         selectEl.innerHTML = '<option value="">Error loading patients</option>';
+    }
+}
+
+// Episode dropdown loading
+async function loadEpisodesIntoDropdown(selectEl) {
+    try {
+        const response = await fetch('/CliniNote/episodes');
+        if (!response.ok) throw new Error(`Failed to load episodes: ${response.status}`);
+
+        const episodes = await response.json();
+
+        selectEl.innerHTML = '<option value="">Select or search episode...</option>';
+
+        episodes.forEach(episode => {
+            const option = document.createElement('option');
+            option.value = episode.id;
+
+            let label = `Episode #${episode.id}`;
+            if (episode.startDate) label += ` - ${episode.startDate}`;
+            if (episode.type) label += ` (${episode.type})`;
+            if (episode.patientName) label += ` - Patient: ${episode.patientName}`;
+            else if (episode.patient) label += ` - Patient ID: ${episode.patient}`;
+
+            option.textContent = label;
+            selectEl.appendChild(option);
+        });
+
+        console.log(`Loaded ${episodes.length} episodes into dropdown`);
+
+    } catch (err) {
+        console.error('Error loading episodes:', err);
+        selectEl.innerHTML = '<option value="">Error loading episodes</option>';
     }
 }
 
@@ -487,30 +489,25 @@ async function setupDialog() {
             input = document.createElement('textarea');
             input.rows = 4;
             input.className = 'form-control';
-          
-        } 
-        else if (field.type === 'checkbox') {
-            // Special handling for checkbox
+        } else if (field.type === 'checkbox') {
             input = document.createElement('input');
             input.type = 'checkbox';
             input.className = 'form-check-input';
             input.id = field.id;
             if (field.default) input.checked = field.default;
 
-            // Wrap in form-check for Bootstrap styling
             const wrapper = document.createElement('div');
             wrapper.className = 'form-check';
             wrapper.appendChild(input);
-            wrapper.appendChild(label.cloneNode(true)); // clone label for checkbox styling
+            wrapper.appendChild(label.cloneNode(true));
             dialogContent.appendChild(wrapper);
-            return; // skip normal append below
-        }
-        else if (field.type === 'multi-select') {
-        input = document.createElement('select');
-        input.id = field.id;
-        input.multiple = true;  // allow multiple selection
-        input.className = 'form-control tom-select-multi';
-            // Populate options
+            return;
+        } else if (field.type === 'multi-select') {
+            input = document.createElement('select');
+            input.id = field.id;
+            input.multiple = true;
+            input.className = 'form-control tom-select-multi';
+
             if (field.options) {
                 field.options.forEach(optVal => {
                     const o = document.createElement('option');
@@ -521,19 +518,16 @@ async function setupDialog() {
             }
 
             dialogContent.appendChild(input);
-        }
-        else if (field.type === 'select' || field.type === 'search-select') {
+        } else if (field.type === 'select' || field.type === 'search-select') {
             input = document.createElement('select');
             input.className = field.type === 'search-select' ? 'form-select tom-select-patient' : 'form-select';
             input.id = field.id;
 
-            // Placeholder
             const placeholder = document.createElement('option');
             placeholder.value = '';
-            placeholder.textContent = field.type === 'search-select' ? 'Search or select patient...' : 'Select';
+            placeholder.textContent = field.type === 'search-select' ? 'Search or select...' : 'Select';
             input.appendChild(placeholder);
 
-            // Static options if any (e.g. Type field)
             if (field.options) {
                 field.options.forEach(optVal => {
                     const o = document.createElement('option');
@@ -550,19 +544,17 @@ async function setupDialog() {
             if (field.default) input.value = field.default;
         }
 
-        // Assign ID and append
-        if (input) {
+        if (input && field.id !== 'active') { // checkbox already appended via wrapper
             input.id = field.id;
             dialogContent.appendChild(input);
         }
     });
 
-
-    // Load episodes for Note forms
+    // Load episodes for Notes
     if (currentEntity === 'notes') {
         const episodeSelect = document.getElementById('episode');
         if (episodeSelect) {
-            console.log("Episode select found, loading episodes...");
+            console.log("Loading episodes for Note form...");
             await loadEpisodesIntoDropdown(episodeSelect);
 
             console.log("Initializing Tom Select for episodes...");
@@ -582,15 +574,14 @@ async function setupDialog() {
                         }
                     }
                 });
-                console.log("Tom Select initialized successfully for episodes");
+                console.log("Tom Select ready for episodes");
             } catch (tsErr) {
-                console.error("Tom Select failed to initialize for episodes:", tsErr);
+                console.error("Tom Select init failed for episodes:", tsErr);
             }
-        } else {
-            console.error("Episode select element not found after building form");
         }
     }
-    // Load patients for Episode forms (after all fields built)
+
+    // Load patients for Episodes
     if (currentEntity === 'episodes') {
         const patientSelect = document.getElementById('patient');
         if (patientSelect) {
@@ -614,9 +605,9 @@ async function setupDialog() {
                         }
                     }
                 });
-                console.log("Tom Select ready");
+                console.log("Tom Select ready for patient");
             } catch (tsErr) {
-                console.error("Tom Select init failed:", tsErr);
+                console.error("Tom Select init failed for patient:", tsErr);
             }
         }
     }
@@ -626,8 +617,8 @@ async function setupDialog() {
 document.querySelectorAll('.tom-select-multi').forEach(select => {
     try {
         new TomSelect(select, {
-            plugins: ['remove_button'],  // allows removing selected items
-            maxItems: null,              // unlimited selections
+            plugins: ['remove_button'],
+            maxItems: null,
             placeholder: 'Select permissions...',
             searchField: ['text'],
             sortField: 'text',
@@ -646,6 +637,7 @@ document.querySelectorAll('.tom-select-multi').forEach(select => {
         console.error("Tom Select multi failed:", err);
     }
 });
+
 // Dialog open
 function openDialog(isEdit = false, rowData = {}) {
     document.getElementById('dialogHeader').textContent = isEdit 
@@ -661,41 +653,34 @@ function openDialog(isEdit = false, rowData = {}) {
             let value = isEdit ? (rowData[field.id] || '') : (field.default || '');
             el.value = value;
             el.classList.remove('is-invalid');
-            // Special for password on edit
+
             if (field.id === 'password' && isEdit) {
                 el.placeholder = 'Leave blank to keep current password';
-                el.value = ''; // never pre-fill password
+                el.value = '';
             }
+
             if (field.type === 'multi-select' && isEdit) {
-            // Split comma-separated string into array for multi-select
-            const values = value.split(',').map(v => v.trim()).filter(v => v);
-            if (el.tomselect) {
-                el.tomselect.setValue(values);
-            } else {
-                el.value = values.join(','); // fallback
+                const values = value.split(',').map(v => v.trim()).filter(v => v);
+                if (el.tomselect) {
+                    el.tomselect.setValue(values);
+                } else {
+                    el.value = values.join(',');
+                }
             }
-        }
         }
     });
 
-   
-    // Pre-select in Tom Select for searchable fields (edit mode)
     if (isEdit) {
-        // For Episode in Notes
         if (currentEntity === 'notes' && rowData.episode) {
             const episodeSelect = document.getElementById('episode');
             if (episodeSelect && episodeSelect.tomselect) {
                 episodeSelect.tomselect.setValue(rowData.episode);
-                console.log("Pre-selected episode ID on edit:", rowData.episode);
             }
         }
-
-        // For Patient in Episodes (already added earlier, keeping for completeness)
         if (currentEntity === 'episodes' && rowData.patient) {
             const patientSelect = document.getElementById('patient');
             if (patientSelect && patientSelect.tomselect) {
                 patientSelect.tomselect.setValue(rowData.patient);
-                console.log("Pre-selected patient ID on edit:", rowData.patient);
             }
         }
     }
@@ -703,7 +688,7 @@ function openDialog(isEdit = false, rowData = {}) {
     crudModal.show();
 }
 
-// Save handler
+// Save handler (fixed multi-select)
 document.getElementById('saveBtn').onclick = async () => {
     const id = document.getElementById('editId')?.value.trim() || '';
     const isEdit = !!id;
@@ -717,40 +702,24 @@ document.getElementById('saveBtn').onclick = async () => {
 
         let value;
 
-        // Password special handling (optional on edit)
         if (field.id === 'password' && isEdit) {
             value = el.value.trim();
-            if (value) data[field.id] = value;  // only send if filled
-            // Skip required check for password on edit
-        }
-        // Multi-select (permissions, etc.)
-        else if (field.type === 'multi-select') {
-            // Get value from Tom Select (array) or fallback to native select value
+            if (value) data[field.id] = value;
+        } else if (field.type === 'multi-select') {
             value = el.tomselect ? el.tomselect.getValue() : el.value;
+            value = Array.isArray(value) ? value.join(',') : (value || '').trim();
 
-            // Ensure it's always a string (join array if multiple)
-            if (Array.isArray(value)) {
-                value = value.join(',');  // e.g. "Patient:Read,Note:Write"
-            } else {
-                value = (value || '').trim();
-            }
-
-            // Required check
             if (field.required && !value) {
                 el.classList.add('is-invalid');
                 valid = false;
             } else {
                 el.classList.remove('is-invalid');
-                data[field.id] = value || null;  // ← this line was missing or skipped
+                data[field.id] = value || null;
             }
-        }
-        // Checkbox (active)
-        else if (field.type === 'checkbox') {
+        } else if (field.type === 'checkbox') {
             value = el.checked;
             data[field.id] = value;
-        }
-        // All other fields (text, date, single select, etc.)
-        else {
+        } else {
             value = el.value.trim();
             if (field.required && !value) {
                 el.classList.add('is-invalid');
@@ -767,7 +736,6 @@ document.getElementById('saveBtn').onclick = async () => {
         return;
     }
 
-    // Debug: see exactly what is sent
     console.log("Data being sent to backend:", data);
 
     try {

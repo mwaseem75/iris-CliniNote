@@ -102,7 +102,7 @@ main {
 
 /* Toolbar (the d-flex container) */
 .searchAdj {
-    padding-top: 50px;           /* normal/desktop view - extra space below navbar */
+    
     margin-bottom: 1.5rem;
 }
 

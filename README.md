@@ -50,8 +50,6 @@ To build and start the container run:
 ```
 $ docker compose up -d && docker compose logs -f
 ```
-To access the application (Credentials admin/admin)
+Navigate to the URL below to access the application (credentials: admin/admin).
 http://localhost:42773/csp/Clininote/index.html
-```
-http://localhost:42773/csp/sys/UtilHome.csp
 ```

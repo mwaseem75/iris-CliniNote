@@ -15,7 +15,7 @@ ClassMethod ListAll() As %Status
         do result.%Push({
             "id": (rs.%Get("ID")),
             "username": (rs.%Get("Username")),
-            "fullName": (rs.%Get("FullName")),
+            "fullname": (rs.%Get("FullName")),
             "role": (rs.%Get("Role")),
             "email": (rs.%Get("Email")),
             "active": (rs.%Get("Active"))
@@ -30,7 +30,7 @@ ClassMethod GetColumns() As %Status
     set columns = [
         { "title": "ID", "field": "id", "visible": false },
         { "title": "Username", "field": "username" },
-        { "title": "Full Name", "field": "fullName" },
+        { "title": "Full Name", "field": "fullname" },
         { "title": "Email", "field": "email" },
         { "title": "Role", "field": "role" },
         { "title": "Active", "field": "active", "formatter": "tickCross" }
@@ -64,7 +64,7 @@ ClassMethod Create() As %Status
     }
     set obj = ##class(dc.CliniNote.User).%New()
     if input.%IsDefined("username") set obj.Username = input.username
-    if input.%IsDefined("fullname") set obj.FullName = input.fullName
+    if input.%IsDefined("fullname") set obj.FullName = input.fullname
     if input.%IsDefined("email") set obj.Email = input.email
     if input.%IsDefined("role") set obj.Role = input.role
     if input.%IsDefined("password") set obj.PasswordHash = ..HashPassword(input.password)
@@ -94,7 +94,7 @@ ClassMethod Update(pId As %Integer) As %Status
     set input = {}.%FromJSON(%request.Content)
 
     if input.%IsDefined("username") set obj.Username = input.username
-    if input.%IsDefined("fullname") set obj.FullName = input.fullName
+    if input.%IsDefined("fullname") set obj.FullName = input.fullname
     if input.%IsDefined("email") set obj.Email = input.email
     if input.%IsDefined("active") set obj.Active = input.active
     if input.%IsDefined("role") set obj.Role = input.role
