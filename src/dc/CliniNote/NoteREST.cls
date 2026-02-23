@@ -5,14 +5,19 @@ Class dc.CliniNote.NoteREST Extends %CSP.REST
 ClassMethod ListAll() As %Status
 {
     set tArray = []
-    set rs = ##class(%SQL.Statement).%ExecDirect(,"SELECT n.%ID, n.NoteDate, n.Doctor, n.Content, e.ID As EpisodeID, p.Name As PatientName FROM dc_CliniNote.Note n LEFT JOIN dc_CliniNote.Episode e ON n.Episode = e.ID LEFT JOIN dc_CliniNote.Patient p ON e.Patient = p.ID")
+    set rs = ##class(%SQL.Statement).%ExecDirect(,"SELECT n.%ID, n.NoteDate, n.Doctor, n.Content, e.ID As EpisodeID,  e.Type As EpisodeType, p.Name As PatientName FROM dc_CliniNote.Note n LEFT JOIN dc_CliniNote.Episode e ON n.Episode = e.ID LEFT JOIN dc_CliniNote.Patient p ON e.Patient = p.ID")
     while rs.%Next() {
+        // Build friendly episode label (same as in dropdown)
+        set label = "#" _ rs.%Get("EpisodeID")
+        if rs.%Get("EpisodeType") '= "" set label = label _ "(" _ rs.%Get("EpisodeType") _ ")"
+        if rs.%Get("PatientName") '= "" set label = label _ ":" _ rs.%Get("PatientName")
         do tArray.%Push({
             "id": (rs.%Get("ID")),
             "notedate": (rs.%Get("NoteDate")),
             "doctor": (rs.%Get("Doctor")),
             "content": (rs.%Get("Content")),
             "episode": (rs.%Get("EpisodeID")),
+            "episodeLabel": (label),
             "patientName": (rs.%Get("PatientName"))
         })
     }

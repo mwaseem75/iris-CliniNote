@@ -5,13 +5,13 @@ Class dc.CliniNote.EpisodeREST Extends %CSP.REST
 ClassMethod ListAll() As %Status
 {
     set tArray = []
-    set rs = ##class(%SQL.Statement).%ExecDirect(,"SELECT %ID, Patient, StartDate, EndDate, Type, Reason FROM dc_CliniNote.Episode")
-   
-    
+    set rs = ##class(%SQL.Statement).%ExecDirect(,"SELECT e.ID, e.Patient, p.Name As PatientName, e.StartDate, e.EndDate, e.Type, e.Reason FROM dc_clininote.Episode e LEFT JOIN dc_clininote.Patient p ON e.Patient = p.ID")
+       
     while rs.%Next() {
         do tArray.%Push({
             "id": (rs.%Get("ID")),
             "patient": (rs.%Get("Patient")),
+            "patientName": (rs.%Get("PatientName")),
             "startdate": ($ZDATE(rs.%Get("StartDate"),3)),
             "enddate": ($ZDATE(rs.%Get("EndDate"),3)),
             "type": (rs.%Get("Type")),
