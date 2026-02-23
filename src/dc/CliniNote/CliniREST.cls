@@ -34,6 +34,23 @@ XData UrlMap [ XMLNamespace = "http://www.intersystems.com/urlmap" ]
     <Route Url="/note/:id" Method="PUT" Call="UpdateNote" />
     <Route Url="/note/:id" Method="DELETE" Call="DeleteNote" />
     <Route Url="/notes/columns" Method="GET" Call="GetNoteColumns" />
+
+    <!-- User -->
+    <Route Url="/users" Method="GET" Call="ListUsers" />
+    <Route Url="/users/columns" Method="GET" Call="GetUserColumns" />   
+    <Route Url="/user/:id" Method="GET" Call="GetUser" />
+    <Route Url="/user" Method="POST" Call="CreateUser" />
+    <Route Url="/user/:id" Method="PUT" Call="UpdateUser" />
+    <Route Url="/user/:id" Method="DELETE" Call="DeleteUser" />
+   
+    <!-- Roles -->
+    <Route Url="/roles" Method="GET" Call="ListRoles" />
+    <Route Url="/roles/columns" Method="GET" Call="GetRoleColumns" />
+    <Route Url="/role/:id" Method="GET" Call="GetRole" />
+    <Route Url="/role" Method="POST" Call="CreateRole" />
+    <Route Url="/role/:id" Method="PUT" Call="UpdateRole" />
+    <Route Url="/role/:id" Method="DELETE" Call="DeleteRole" />
+
     <!-- Log In -->
     <Route Url="/login" Method="POST" Call="Login" />
     <!-- vector search -->
@@ -207,6 +224,79 @@ ClassMethod GetNoteColumns() As %Status
     quit ##class(dc.CliniNote.NoteREST).GetColumns()
 }
 
+// USERS
+
+ClassMethod ListUsers() As %Status
+{
+    quit ##class(dc.CliniNote.UserREST).ListAll()
+}
+
+ClassMethod GetUser(pId As %Integer) As %Status
+{
+    quit ##class(dc.CliniNote.UserREST).GetOne(pId)
+}
+
+/// GET /patients - List all patients
+ClassMethod CreateUser() As %Status
+{
+    quit ##class(dc.CliniNote.UserREST).Create()
+}
+
+/// POST /patient - Create new patient
+ClassMethod UpdateUser(pId As %Integer) As %Status
+{
+    quit ##class(dc.CliniNote.UserREST).Update(pId)
+}
+
+/// PUT /patient/:id - Update existing patient
+ClassMethod DeleteUser(pId As %Integer) As %Status
+{
+    quit ##class(dc.CliniNote.User).Delete(pId)
+}
+
+/// Description
+ClassMethod GetUserColumns() As %Status
+{
+    quit ##class(dc.CliniNote.UserREST).GetColumns()
+}
+
+// ROLES
+
+ClassMethod ListRoles() As %Status
+{
+    quit ##class(dc.CliniNote.RoleREST).ListAll()
+}
+
+ClassMethod GetRole(pId As %Integer) As %Status
+{
+    quit ##class(dc.CliniNote.RoleREST).GetOne(pId)
+}
+
+/// GET /patients - List all patients
+ClassMethod CreateRole() As %Status
+{
+    quit ##class(dc.CliniNote.RoleREST).Create()
+}
+
+/// POST /patient - Create new patient
+ClassMethod UpdateRole(pId As %Integer) As %Status
+{
+    quit ##class(dc.CliniNote.RoleREST).Update(pId)
+}
+
+/// PUT /patient/:id - Update existing patient
+ClassMethod DeleteRole(pId As %Integer) As %Status
+{
+    quit ##class(dc.CliniNote.RoleREST).Delete(pId)
+}
+
+/// Description
+ClassMethod GetRoleColumns() As %Status
+{
+    quit ##class(dc.CliniNote.RoleREST).GetColumns()
+}
+
+/// Vector search
 ClassMethod VectorSearchNotes() As %Status
 {
     set input = {}.%FromJSON(%request.Content)

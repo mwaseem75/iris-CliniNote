@@ -9,7 +9,6 @@
       <SourcesRoot>src</SourcesRoot>
       <Resource Name="dc.CliniNote.PKG"/>
       <Invoke Class="dc.CliniNote.SampleDataGenerator" Method="GenerateSampleData"></Invoke>
-      <Invoke Class="dc.CliniNote.User" Method="CreateTestUsers"></Invoke>
       <CSPApplication 
         CookiePath="/csp/CliniNote/" 
         DefaultTimeout="900" 

@@ -18,16 +18,26 @@ ClassMethod GenerateSampleData() As %Status
         set tSC = ..CreateNotes()
         if $$$ISERR(tSC) $$$ThrowStatus(tSC)
 
+        write !,"Creating sample Users...",!
+        do ##class(dc.CliniNote.User).CreateTestUsers()
+
+        write !,"Creating sample Roles...",!
+        do ##class(dc.CliniNote.Role).CreateTestRoles()
+
         write !,"Sample data generation completed successfully.",!
         write "Summary:",!
 
         &sql(SELECT COUNT(*) INTO :cntP FROM dc_CliniNote.Patient)
         &sql(SELECT COUNT(*) INTO :cntE FROM dc_CliniNote.Episode)
         &sql(SELECT COUNT(*) INTO :cntN FROM dc_CliniNote.Note)
+        &sql(SELECT COUNT(*) INTO :cntU FROM dc_CliniNote."User")
+        &sql(SELECT COUNT(*) INTO :cntR FROM dc_CliniNote."Role")
 
         write "  Patients : ", cntP, !
         write "  Episodes : ", cntE, !
         write "  Notes    : ", cntN, !
+        write "  Users    : ", cntU, !
+        write "  Roles    : ", cntR, !
     }
     catch ex {
         set tSC = ex.AsStatus()
@@ -262,8 +272,7 @@ ClassMethod CreateNotes() As %Status [ Private ]
             WHERE ID = :newId)
 
             if SQLCODE = 100 {
-                write !, "No row found with ID ", id
-            }
+                write !, "No row found "            }
             if SQLCODE < 0 {
                 write !, "SQL error: ", SQLCODE, " ", %msg
             }
@@ -297,6 +306,8 @@ ClassMethod ClearSampleData() As %Status
     &sql(DELETE FROM dc_CliniNote.Note)
     &sql(DELETE FROM dc_CliniNote.Episode)
     &sql(DELETE FROM dc_CliniNote.Patient)
+    &sql(DELETE FROM dc_CliniNote.User)
+    &sql(DELETE FROM dc_CliniNote.Role)
     quit $$$OK
 }
 
