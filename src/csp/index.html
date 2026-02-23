@@ -124,8 +124,8 @@
       </div>
 
       <div class="text-center text-muted small">
-        <a href="#">Forgot password?</a> • <a href="#">Contact support</a>
-      </div>
+    <a href="#" onclick="showDemoCredentials()" style="cursor: pointer;">Forgot password?</a> 
+</div>
     </form>
   </div>
 
@@ -195,6 +195,33 @@
         loginSpinner.classList.add('d-none');
       }
     });
+
+    function showDemoCredentials() {
+    
+    //alert("For demo purposes only:\n\nUsername: admin\nPassword: admin\n\nIn a real application, password recovery would be implemented with email verification.");
+    
+    // Optional: nicer Bootstrap alert/toast version (if you want)
+    // Uncomment if you prefer toast style
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast align-items-center text-bg-info border-0 position-fixed bottom-0 end-0 m-3';
+    toast.role = 'alert';
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                <strong>Demo Credentials:</strong><br>
+                Username: <strong>admin</strong><br>
+                Password: <strong>admin</strong><br>
+                <small>(Real password recovery would use email verification)</small>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+    document.body.appendChild(toast);
+    new bootstrap.Toast(toast).show();
+    setTimeout(() => toast.remove(), 8000); // auto-dismiss after 8 seconds
+    
+}
 
     function showError(msg) {
       errorAlert.textContent = msg;
