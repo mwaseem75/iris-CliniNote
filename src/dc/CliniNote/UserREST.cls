@@ -115,6 +115,23 @@ ClassMethod Update(pId As %Integer) As %Status
 /// DELETE /user/:id - Delete user
 ClassMethod Delete(pId As %Integer) As %Status
 {
+    
+    set user = ##class(dc.CliniNote.User).%OpenId(pId)
+    if '$IsObject(user) {
+        set %response.Status = 404
+        write {"error":"User not found"}.%ToJSON()
+        quit $$$OK
+    }
+
+    if (user.Username = "admin") {
+        set %response.Status = 403
+        write {"error":"Cannot delete the admin user"}.%ToJSON()
+        quit $$$OK
+    }
+    
+    
+    
+    
     set sc = ##class(dc.CliniNote.User).%DeleteId(pId)
     if $$$ISERR(sc) {
         set %response.Status = 500

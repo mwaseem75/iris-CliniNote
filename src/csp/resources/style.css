@@ -88,6 +88,17 @@ main {
     min-height: calc(100vh - 56px);
 }
 
+.toast {
+    min-width: 350px;          /* wider base size */
+    max-width: 500px;          /* cap it so it doesn't take full screen */
+    word-wrap: break-word;     /* force long words to wrap */
+    white-space: normal;       /* allow normal text wrapping */
+}
+
+.toast-body {
+    white-space: pre-wrap;     /* preserve line breaks if any */
+    word-break: break-word;    /* break very long words */
+}
 
 /* Stronger similarity colors in vector search results */
 .text-success-strong {

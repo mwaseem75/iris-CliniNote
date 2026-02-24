@@ -96,6 +96,15 @@ ClassMethod Update(pId As %Integer) As %Status
 /// DELETE /episode/:id - Delete episode
 ClassMethod Delete(pId As %Integer) As %Status
 {
+    
+    set count = 0
+    &sql(SELECT COUNT(*) INTO :count FROM dc_CliniNote.Note WHERE Episode = :pId)
+    if (count > 0) {
+        set %response.Status = 400
+        write {"error":"Cannot delete episode - has associated notes"}.%ToJSON()
+        quit $$$OK
+    }
+
     set sc = ##class(dc.CliniNote.Episode).%DeleteId(pId)
     if $$$ISERR(sc) {
         set %response.Status = 500

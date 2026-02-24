@@ -1,4 +1,4 @@
-// app.js - Clinical Application (fully fixed version)
+// app.js - Clinical Application (with Delete button)
 
 if (!localStorage.getItem('authToken')) {
     window.location.href = 'login.html';
@@ -247,27 +247,25 @@ function attachGridSearch() {
 
     input.value = '';
 
-    searchInput.addEventListener('input', () => {
-    clearTimeout(window.gridSearchTimer);
-    window.gridSearchTimer = setTimeout(() => {
-        const term = searchInput.value.trim().toLowerCase();
-        console.log("Applying filter with term:", term);
+    input.addEventListener('input', () => {
+        clearTimeout(window.gridTimer);
+        window.gridTimer = setTimeout(() => {
+            const term = input.value.trim().toLowerCase();
+            console.log("Search term:", term);
 
-        if (term === '') {
-            table.clearFilter();
-            console.log("Filter cleared");
-        } else {
-            table.setFilter(function(data, filterParams) {
-                // Custom global search: check every string value in the row
-                return Object.values(data).some(value => {
-                    if (value == null) return false;
-                    return String(value).toLowerCase().includes(term);
+            if (term === '') {
+                table.clearFilter();
+            } else {
+                table.setFilter(function(data, filterParams) {
+                    return Object.values(data).some(value => {
+                        if (value == null) return false;
+                        return String(value).toLowerCase().includes(term);
+                    });
                 });
-            });
-            console.log("Custom filter applied");
-        }
-    }, 300);
-});
+            }
+        }, 300);
+    });
+
     clear.addEventListener('click', () => {
         input.value = '';
         table.clearFilter();
@@ -685,85 +683,81 @@ function openDialog(isEdit = false, rowData = {}) {
         }
     }
 
+    // Add Delete button only in edit mode
+    const footer = document.querySelector('#crudModal .modal-footer');
+    if (footer) {
+        footer.innerHTML = '';
+
+        // Close
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'btn btn-secondary';
+        closeBtn.textContent = 'Close';
+        closeBtn.setAttribute('data-bs-dismiss', 'modal');
+        footer.appendChild(closeBtn);
+
+        // Save
+        const saveBtn = document.createElement('button');
+        saveBtn.type = 'button';
+        saveBtn.className = 'btn btn-primary ms-2';
+        saveBtn.textContent = 'Save';
+        saveBtn.id = 'saveBtn';
+        footer.appendChild(saveBtn);
+
+        // Delete - only in edit mode
+        if (isEdit && currentEntity !== 'users') { 
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'btn btn-danger ms-auto';
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.onclick = () => confirmAndDelete(rowData.id);
+            footer.appendChild(deleteBtn);
+        }
+    }
+
     crudModal.show();
 }
 
-// Save handler (fixed multi-select)
-document.getElementById('saveBtn').onclick = async () => {
-    const id = document.getElementById('editId')?.value.trim() || '';
-    const isEdit = !!id;
-
-    const data = {};
-    let valid = true;
-
-    ENTITIES[currentEntity].fields.forEach(field => {
-        const el = document.getElementById(field.id);
-        if (!el) return;
-
-        let value;
-
-        if (field.id === 'password' && isEdit) {
-            value = el.value.trim();
-            if (value) data[field.id] = value;
-        } else if (field.type === 'multi-select') {
-            value = el.tomselect ? el.tomselect.getValue() : el.value;
-            value = Array.isArray(value) ? value.join(',') : (value || '').trim();
-
-            if (field.required && !value) {
-                el.classList.add('is-invalid');
-                valid = false;
-            } else {
-                el.classList.remove('is-invalid');
-                data[field.id] = value || null;
-            }
-        } else if (field.type === 'checkbox') {
-            value = el.checked;
-            data[field.id] = value;
-        } else {
-            value = el.value.trim();
-            if (field.required && !value) {
-                el.classList.add('is-invalid');
-                valid = false;
-            } else {
-                el.classList.remove('is-invalid');
-                data[field.id] = value || null;
-            }
-        }
-    });
-
-    if (!valid) {
-        alert('Please fill all required fields');
+// Delete confirmation & execution
+function confirmAndDelete(id) {
+    const entityName = ENTITIES[currentEntity].title.slice(0, -1); // e.g. "User", "Episode"
+    if (!confirm(`Are you sure you want to delete this ${entityName}? This cannot be undone.`)) {
         return;
     }
 
-    console.log("Data being sent to backend:", data);
-
-    try {
-        let url = ENTITIES[currentEntity].baseUrl;
-        let method = 'POST';
-        if (isEdit) {
-            url += `/${id}`;
-            method = 'PUT';
+    // Frontend quick check for admin user
+    if (currentEntity === 'users') {
+        const currentUser = JSON.parse(localStorage.getItem('user'));
+        if (currentUser && currentUser.username === 'admin' && id === currentUser.id) {
+            showToast('danger', 'Cannot delete the admin user');
+            return;
         }
+    }
 
-        const r = await fetch(url, {
-            method,
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data)
+    deleteRecord(id);
+}
+
+async function deleteRecord(id) {
+    try {
+        const url = `${ENTITIES[currentEntity].baseUrl}/${id}`;
+        const res = await fetch(url, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' }
         });
 
-        if (!r.ok) {
-            const err = await r.json().catch(() => ({}));
-            throw new Error(err.error || `HTTP ${r.status}`);
+        if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.error || `Delete failed (HTTP ${res.status})`);
         }
 
         table.setData(ENTITIES[currentEntity].listUrl);
         crudModal.hide();
-        showToast('success', 'Saved successfully');
+        showToast('success', `${ENTITIES[currentEntity].title.slice(0, -1)} deleted successfully`);
+
     } catch (err) {
-        showToast('danger', 'Save failed: ' + err.message);
+        showToast('danger', err.message);
     }
-};
+}
 
 // Toast
 function showToast(type, message) {
