@@ -52,4 +52,3 @@ $ docker compose up -d && docker compose logs -f
 ```
 Navigate to the URL below to access the application (credentials: admin/admin).
 http://localhost:42773/csp/Clininote/index.html
-```
