@@ -4,7 +4,7 @@
     <Module>
       <Name>iris-CliniNote</Name>
 	  <Description>Modern clinical documentation platform with semantic search capabilities.</Description> 
-      <Version>0.0.1</Version>
+      <Version>0.0.2</Version>
       <Packaging>module</Packaging>
       <SourcesRoot>src</SourcesRoot>
       <Resource Name="dc.CliniNote.PKG"/>
