@@ -301,13 +301,14 @@ ClassMethod VectorSearchNotes() As %Status
 {
     set input = {}.%FromJSON(%request.Content)
     set queryText = input.query
+    set noteid = input.noteid
     
     if (queryText = "") {
         set %response.Status = 400
         write {"error":"Query text is required"}.%ToJSON()
         quit $$$OK
     }
-
+ 
     try {
         // Generate embedding for the query
         set queryVector = ##class(dc.CliniNote.NoteREST).Embedd(queryText)
@@ -318,9 +319,16 @@ ClassMethod VectorSearchNotes() As %Status
         }
 
         // SQL query with vector distance
-        set sql="SELECT top 5 ID, Content,VECTOR_COSINE(ContentEmbedding, TO_VECTOR(?, DOUBLE, 384)) as Similarity FROM dc_CliniNote.Note ORDER BY VECTOR_DOT_PRODUCT(ContentEmbedding, TO_VECTOR(?, DOUBLE, 384)) DESC"
-	    set rs=##class(%SQL.Statement).%ExecDirect(.stmt,sql,queryVector,queryVector)
-                    
+        // searcg with Patient filter if noteid provided, otherwise search all notes
+        if noteid '= 0 {
+            set sql="SELECT top 5 ID, Content,VECTOR_COSINE(ContentEmbedding, TO_VECTOR(?, DOUBLE, 384)) as Similarity FROM dc_CliniNote.Note WHERE id != ? ORDER BY VECTOR_DOT_PRODUCT(ContentEmbedding, TO_VECTOR(?, DOUBLE, 384)) DESC"
+	        set rs=##class(%SQL.Statement).%ExecDirect(.stmt,sql,queryVector,noteid,queryVector)
+        }
+        else
+        {
+            set sql="SELECT top 5 ID, Content,VECTOR_COSINE(ContentEmbedding, TO_VECTOR(?, DOUBLE, 384)) as Similarity FROM dc_CliniNote.Note ORDER BY VECTOR_DOT_PRODUCT(ContentEmbedding, TO_VECTOR(?, DOUBLE, 384)) DESC"
+	        set rs=##class(%SQL.Statement).%ExecDirect(.stmt,sql,queryVector,queryVector)
+         }           
         set results = []
         while rs.%Next() {
             do results.%Push({

@@ -1,4 +1,5 @@
 // app.js - Clinical Application (with Delete button)
+window.noteValue = '';
 
 if (!localStorage.getItem('authToken')) {
     window.location.href = 'login.html';
@@ -50,7 +51,7 @@ const ENTITIES = {
         ]
     },
     vectorSearch: {
-        title: 'Vector Search',
+        title: 'Patient Notes Semantic Search',
         noGrid: true
     },
     users: {
@@ -168,6 +169,16 @@ async function loadGrid() {
         // Force read-only + friendly formatters
         dynamicColumns.forEach(col => {
             col.editable = false;
+            // Special handling for Content column in Notes
+            if (currentEntity === 'notes' && col.field === 'content') {
+                col.width = 600;               // wider column (adjust 500–800 as needed)
+                col.formatter = function(cell) {
+                    const value = cell.getValue() || '';
+                    // Allow text wrapping + show more lines
+                    return `<div style="white-space: normal; word-wrap: break-word; max-height: 120px; overflow: auto;">${value}</div>`;
+                };
+                col.title = "Content";  // optional rename
+            }
             if (col.field === 'patient') {
                 col.formatter = function(cell) {
                     const rowData = cell.getRow().getData();
@@ -232,7 +243,11 @@ async function loadGrid() {
         document.getElementById('gridContainer').innerHTML = `<div class="alert alert-danger m-4">Error: ${err.message}</div>`;
     }
 }
-
+// close top patients panel (if implemented as a side panel instead of modal)
+function closeTopPatientsPanel() {
+    const panel = document.getElementById('topPatientsPanel');
+    if (panel) panel.style.transform = 'translateX(100%)';
+}
 // Reusable grid search attachment
 function attachGridSearch() {
     const input = document.getElementById('searchInput');
@@ -374,7 +389,7 @@ async function performVectorSearch() {
         const res = await fetch('/CliniNote/notes/vector-search', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query, limit: 10 })
+            body: JSON.stringify({ query, limit: 10, noteid:0 })
         });
 
         const data = await res.json();
@@ -644,12 +659,14 @@ function openDialog(isEdit = false, rowData = {}) {
 
     const editIdEl = document.getElementById('editId');
     if (editIdEl) editIdEl.value = isEdit ? (rowData.id || '') : '';
-
+    window.noteValue = rowData.id;
     ENTITIES[currentEntity].fields.forEach(field => {
         const el = document.getElementById(field.id);
         if (el) {
             let value = isEdit ? (rowData[field.id] || '') : (field.default || '');
             el.value = value;
+            //assign note id in global variable
+            
             el.classList.remove('is-invalid');
 
             if (field.id === 'password' && isEdit) {
@@ -683,6 +700,7 @@ function openDialog(isEdit = false, rowData = {}) {
         }
     }
 
+    
     // Add Delete button only in edit mode
     const footer = document.querySelector('#crudModal .modal-footer');
     if (footer) {
@@ -713,11 +731,85 @@ function openDialog(isEdit = false, rowData = {}) {
             deleteBtn.onclick = () => confirmAndDelete(rowData.id);
             footer.appendChild(deleteBtn);
         }
+        // Top 5 Matching Patients button - only for Notes
+        if (currentEntity === 'notes') {
+            const topPatientsBtn = document.createElement('button');
+            topPatientsBtn.type = 'button';
+            topPatientsBtn.className = 'btn btn-info ms-2';
+            topPatientsBtn.innerHTML = '<i class="bi bi-search-heart me-1"></i> Top 5 Similar Patients Notes';
+            topPatientsBtn.onclick = findTopMatchingPatients; // ← no arrow function needed
+            footer.appendChild(topPatientsBtn);
+        }
     }
 
     crudModal.show();
 }
 
+//Top 5 matching patients based on current note content
+async function findTopMatchingPatients() {
+    const contentEl = document.getElementById('content');
+    if (!contentEl || !contentEl.value.trim()) {
+        showToast('warning', 'Please enter some note content first');
+        return;
+    }
+    
+    const queryText = contentEl.value.trim();
+    // Show side panel
+    const panel = document.getElementById('topPatientsPanel');
+    const contentDiv = document.getElementById('topPatientsContent');
+    if (!panel || !contentDiv) return;
+
+    contentDiv.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-3">Searching similar patients...</p>
+        </div>
+    `;
+    panel.style.transform = 'translateX(0)';
+    
+    try {
+        const res = await fetch('/CliniNote/notes/vector-search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                query: queryText,
+                noteid: window.noteValue,
+                limit: 5
+            })
+        });
+
+        if (!res.ok) throw new Error('Search failed');
+
+        const results = await res.json();
+
+        contentDiv.innerHTML = '';
+
+        if (results.length === 0) {
+            contentDiv.innerHTML = '<div class="alert alert-info">No similar patients found</div>';
+            return;
+        }
+
+        let html = '';
+        results.forEach(r => {
+            const sim = (r.similarity * 100).toFixed(1);
+            html += `
+                <div class="list-group-item mb-3 border">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong>Note #${r.id }</strong>
+                        <span class="badge bg-success">${sim}% match</span>
+                    </div>
+                    <p class="mt-2 small text-muted">${r.content}</p>
+                </div>
+            `;
+        });
+
+        contentDiv.innerHTML = html;
+
+    } catch (err) {
+        contentDiv.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+        setTimeout(() => panel.style.transform = 'translateX(100%)', 5000);
+    }
+}
 // Delete confirmation & execution
 function confirmAndDelete(id) {
     const entityName = ENTITIES[currentEntity].title.slice(0, -1); // e.g. "User", "Episode"
