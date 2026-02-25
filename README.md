@@ -1,5 +1,4 @@
-# Clinical Notes App
-
+# Semantic Clinical Notes Application
 A modern, responsive full-stack CSP application for managing clinical patient data, episodes, and doctor notes — built with **InterSystems IRIS**, **ObjectScript**, **Bootstrap 5**, **Tabulator**, and **vector search** capabilities.
 <img width="1907" alt="image" src="https://github.com/user-attachments/assets/70072e88-b7db-4987-b1c7-8c28f627128b" />
 
@@ -8,8 +7,9 @@ A modern, responsive full-stack CSP application for managing clinical patient da
 - **Patient Management** — CRUD operations (create, read, update, delete)
 - **Episode Tracking** — episodes linked to patients with type, dates, and reason
 - **Clinical Notes** — doctor notes attached to episodes
+- **Top 5 matching notes** panel showing semantically similar notes against the selected note
 - **Semantic Vector Search** — search notes by meaning (not just keywords) using IRIS native vector search + sentence-transformers embeddings
-- **User Authentication** — custom login system with roles (Admin, Doctor, Nurse, Viewer)
+- **Searchable dropdowns** for linked entities (Patient → Episode, Episode → Note) using Tom Select
 - **Responsive Design** — works great on desktop and mobile
 - **Professional UI** — Bootstrap 5 + clean sidebar navigation
 
