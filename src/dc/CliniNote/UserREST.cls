@@ -128,9 +128,7 @@ ClassMethod Delete(pId As %Integer) As %Status
         write {"error":"Cannot delete the admin user"}.%ToJSON()
         quit $$$OK
     }
-    
-    
-    
+       
     
     set sc = ##class(dc.CliniNote.User).%DeleteId(pId)
     if $$$ISERR(sc) {
