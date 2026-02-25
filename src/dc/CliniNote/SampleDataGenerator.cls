@@ -190,6 +190,16 @@ ClassMethod CreateNotes() As %Status [ Private ]
 {
     set tSC = $$$OK
     try {
+
+        //create HNSW index on ContentEmbedding vector column (if not exists)
+        &sql( CREATE INDEX HNSWIndex ON TABLE dc_clininote.note (ContentEmbedding) AS %SQL.Index.HNSW(Distance='Cosine'))      
+        if SQLCODE < 0 {
+        write "Error creating HNSW index: ", SQLCODE, " ", %msg, !
+        } elseif SQLCODE = 100 {
+        write "No rows affected (normal for DDL)", !
+        } else {
+        write "HNSW index created successfully", !
+        }
         // ── Collect all episode IDs using cursor ───────────────────────────────
         &sql(DECLARE EpCursor CURSOR FOR
              SELECT ID FROM dc_CliniNote.Episode ORDER BY ID)
@@ -306,8 +316,8 @@ ClassMethod ClearSampleData() As %Status
     &sql(DELETE FROM dc_CliniNote.Note)
     &sql(DELETE FROM dc_CliniNote.Episode)
     &sql(DELETE FROM dc_CliniNote.Patient)
-    &sql(DELETE FROM dc_CliniNote.User)
-    &sql(DELETE FROM dc_CliniNote.Role)
+    &sql(DELETE FROM dc_CliniNote."User")
+    &sql(DELETE FROM dc_CliniNote."Role")
     quit $$$OK
 }
 

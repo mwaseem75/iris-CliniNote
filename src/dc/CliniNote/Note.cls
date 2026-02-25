@@ -1,4 +1,4 @@
-Class dc.CliniNote.Note Extends (%Persistent, %JSON.Adaptor)
+Class dc.CliniNote.Note Extends (%Persistent, %JSON.Adaptor) [ DdlAllowed ]
 {
 
 /// Reference to the episode this note belongs to
