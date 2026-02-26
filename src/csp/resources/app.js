@@ -1,4 +1,5 @@
-// app.js - Clinical Application (with Delete button)
+// app.js - Clinical Application 
+// init Global variables
 window.noteValue = '';
 
 if (!localStorage.getItem('authToken')) {
@@ -98,6 +99,7 @@ const ENTITIES = {
     }
 };
 
+//default to patients view and initialize Tabulator instance variable
 let currentEntity = 'patients';
 let table = null;
 
@@ -373,7 +375,7 @@ function renderVectorSearchUI() {
         if (e.key === 'Enter') performVectorSearch();
     });
 }
-
+//vector search execution
 async function performVectorSearch() {
     const query = document.getElementById('vectorQuery').value.trim();
     const resultsDiv = document.getElementById('vectorResults');
@@ -433,7 +435,7 @@ async function performVectorSearch() {
         resultsDiv.innerHTML = `<div class="alert alert-danger">Error: ${err.message}</div>`;
     }
 }
-
+// View full note content in modal
 async function openNote(noteId) {
     try {
         const res = await fetch(`/CliniNote/note/${noteId}`);
@@ -828,7 +830,7 @@ function confirmAndDelete(id) {
 
     deleteRecord(id);
 }
-
+//delete record function
 async function deleteRecord(id) {
     try {
         const url = `${ENTITIES[currentEntity].baseUrl}/${id}`;
